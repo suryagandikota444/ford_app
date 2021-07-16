@@ -8,6 +8,11 @@ import { ShareableReactImage } from './instagram_shareable';
 import { login } from './loginPage'
 import { loadMap } from './loadMap'
 import { reverseGeoCoding } from './reverseGeoCoding';
+import AppLoading from 'expo-app-loading';
+import {
+  useFonts, 
+  Inter_900Black,
+}from '@expo-google-fonts/inter';
 
 const jsonToFormData = (json) => {
   const body = [];
@@ -38,6 +43,7 @@ const styles = StyleSheet.create({
     borderRadius: 10, 
     marginBottom:10
   }, modalText: {
+    //fontFamily:'RubikSans_400Regular',
     fontSize:20, 
     textAlign:'center', 
     margin:20
@@ -65,7 +71,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     margin:10,
   },textStyle: {
-    color: 'white',
+   
     fontWeight: 'bold',
     textAlign: 'center',
   }, modalText: {
@@ -75,6 +81,9 @@ const styles = StyleSheet.create({
 });
 
 function mainPage({route, navigation}) {
+  let [fontsLoaded] = useFonts({
+    Inter_900Black,
+  })
   const [isLoading, setLoading] = useState(true); 
   const [accessToken, setAccessToken] = useState('');
   const [authData, setAuthData] = useState({'access_token':''});
@@ -148,7 +157,7 @@ function mainPage({route, navigation}) {
   }, [accessToken])
 
   useEffect(() => {
-    if (vehicleData.vehicle.modelYear != '') {
+    if (vehicleData.vehicle.modelYear != '' ) {
       setLoading(false)
     }
   }, [vehicleData])
@@ -157,7 +166,7 @@ function mainPage({route, navigation}) {
     <View>
       {isLoading ? <Text style = {{textAlign: 'center'}}> Loading... </Text>:
       <View>
-        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
+        <Text style= {{fontWeight:"bold", fontSize:25, fontFamily: 'Inter_900Black', paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
         <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
         <View alignItems="center" justifyContent="center">
           <Image
@@ -188,6 +197,13 @@ function loadBadges({route}) {
   const [modal100milesVisible, setModal100milesVisible] = useState(false);
   const [modal500milesVisible, setModal500milesVisible] = useState(false);
   const {odometer} = route.params;
+  const [copiedText, setCopiedText] = useState('')
+
+  const copyToClipboard = () => {
+      Clipboard.setString("#fordfirst500");
+  }
+
+
   if (odometer >= 100) {
     var hundredMiles = true;
   }
@@ -206,8 +222,13 @@ function loadBadges({route}) {
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
+
           <Text style={styles.modalText}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
           <Text style={styles.modalText}>#fordfirst100</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text>Click here to copy to Clipboard</Text>
+          </TouchableOpacity>
+          <ShareableReactImage />
         </View>
       </Modal>
       <Modal animationType="fade" transparent={true} visible={modal500milesVisible} 
@@ -216,8 +237,12 @@ function loadBadges({route}) {
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
+
           <Text style={styles.modalText}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
           <Text style={styles.modalText}>#fordfirst500</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text>Click here to copy to Clipboard</Text>
+          </TouchableOpacity>
           <ShareableReactImage />
         </View>
       </Modal>
