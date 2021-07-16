@@ -1,0 +1,44 @@
+const jsonToFormData = (json) => {
+    const body = [];
+    // eslint-disable-next-line guard-for-in,no-restricted-syntax
+    for (const property in json) {
+      const encodedKey = encodeURIComponent(property);
+      const encodedValue = encodeURIComponent(json[property]);
+      body.push(`${encodedKey}=${encodedValue}`);
+    }
+    return body.join('&');
+  }
+
+  let body_object = {
+    'grant_type': 'refresh_token',
+    'client_id': '30990062-9618-40e1-a27b-7c6bcb23658a',
+    'client_secret':'T_Wk41dx2U9v22R5sQD4Z_E1u-l2B-jXHE',
+    'refresh_token':'eyJraWQiOiI2cjIzQ2FTeTF4cFdUUFBxYVRtX01Vc2RKZGo1RWlDTnRtME4yVTAxNTdFIiwidmVyIjoiMS4wIiwiemlwIjoiRGVmbGF0ZSIsInNlciI6IjEuMCJ9.Qr2W37KbOw3aT-QkWCPrnCPhIbTCDGgmdNTM0tha2DLBpJgcspsTxEC_bj9TQt9CADO_x-af9wfPkg1nJqKZW81ivLaISlxnkU7k_0CVqf9hOUjykDxOAeJeb6PnImdY8-tP8QSy98kmKn7xT1UC2nXd9Bdlx99dUTfkMG2tp5CVP25wpVJEShGsnjFBOZvNhW-X1HW_WIG-Z8YFTQhb67iU42PvF7PNQEGIUDMPNRckznpnH0PYNrAsRuJmCKAkUFOa6UeLH07n_X5s1syFXYJ0ptdMGcTtBis2O58rglJ1QMNH7XKfsO_f0Yhn4_azOxGYYw7ZZzemTW1jszqrqg.Er3Zx0Q0hQxy4p-n.idzKKlJEPNQaCZkIcbkRVWI8dd7asDToxsALRlVhejvkdt4thOU7SgPH5jWxJFbMeVVeycaesVh5-BBxrdC8BS-KvKlWjG5nblMjPa-VY2soBkXullNmTJb24Wz6YYs3j3SiMHZ5MCaVaaHS5S5xX9v9c8J-CeFZR9T21IB4WVNtfuBdLRDayr3y1LkTLtHkq1ryjipsfwQnnXjNeBJNf1HWZsQfIZrNT-Ny0j8kcDuuV5AvrBjsVvHun9rbDOXpO_2Aar0gsaDdYL9yyPKSQfZWYN20AxFxWGsolVTx0Tj-S5b-5QjmjA4h-7NzJFs6zewzse9Ezab9Z2muCUGd43UIFZPX4_YjiKbC4nElmeoGuduptD3hyc3vvt-6kB_Ca9Zk-t0-5AjkDOsp21NKj2Tok6-1DOvORBNbTb2x8PMuK9nuF4ZrR84kCplGTYwY2ElHPmZyjr6e-rioQ4_6qz0MVfbmou6a50fYkICwWxCnUawUh1jZvo4eOevIc4qjNCX-pcwiP2psjAL6X_2beUqhRaZZlL_zCfxCJ-JdnOLvHqSQjeOTSiUnOcYag1ARw292-x9lRF3Gj4YLld1qUSzEFhUP0NT5CQxgVO2liGDZwfk7TgBx0iGKMJM1Tk5cfKYHpvmMK3ZyPbIsBtNSJo_DGBD6EvSRPeaLx1z-gge82rN4Wb8Q41UzhsD9EamwQGr8hznhiVjRDcempgzNPjx4h2D0acunXa4aerpIRtYcbVhRqCGzo-JeZ_E_swageG4mYEzf_uF_6kChZpvrJXtA-p44W9OcKEmjZf0s-yTbDK0kXrEO8hfNxRUDqAwphRb_fGxlljSYCqkx608.Flt-j42kONfsAIklxaqMlQ'
+  }
+
+  let post_request= {
+    method: 'post',
+    headers: {
+      'Content-Type':'application/x-www-form-urlencoded'
+    },
+    body: 'grant_type=refresh_token',
+  }
+
+  let get_request= {
+    method: 'get',
+    headers: {
+      'accept':'application/json',
+      'Content-Type':'application/json',
+      'api-version':'2020-06-01',
+      'Application-Id':'afdc085b-377a-4351-b23e-5e1d35fb3700',
+      'authorization':'Bearer {eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlMxUEZhdzdkR2s3bHNFQmEzUjVWMnRLSzVYYnNIWEJsemFXZGhjNUVNdW8ifQ.eyJpc3MiOiJodHRwczovL2RhaDJ2YjJjcHJvZC5iMmNsb2dpbi5jb20vOTE0ZDg4YjEtMzUyMy00YmY2LTliZTQtMWI5NmI0ZjZmOTE5L3YyLjAvIiwiZXhwIjoxNjI2MjM1Mjc4LCJuYmYiOjE2MjYyMzQwNzgsImF1ZCI6ImMxZTRjMWEwLTI4NzgtNGU2Zi1hMzA4LTgzNmIzNDQ3NGVhOSIsImxvY2FsZSI6ImVuIiwiaWRwIjoiYjJjX0RwSzFPQW44ZFEiLCJtdG1JZCI6Ijg4OTk2ZjE1LTE0ZTktNDkyOS1hZjU2LTFlNTE2MGUxZGEzYiIsInVzZXJHdWlkIjoiQnI1VDFCUUlwczNHM0F1d1c5QkFUa1ZlWUZheUMrT3p2WFRJMXJZM0JlQWN0QjlFakNxQm5ydDlidllNRGVIaCIsInN1YiI6IjVjODNiYTA1LTM4ZDktNGUzZC1hNTc2LTZiNmIwZjM4ZDI0ZSIsIm5vbmNlIjoiMTIzNDU2Iiwic2NwIjoiYWNjZXNzIiwiYXpwIjoiMzA5OTAwNjItOTYxOC00MGUxLWEyN2ItN2M2YmNiMjM2NThhIiwidmVyIjoiMS4wIiwiaWF0IjoxNjI2MjM0MDc4fQ.D15_LHq9tnMmFZLbdXoGhswUKG7EWAHalPkO7tpWB450U9EWdyooikaPEuVug43vsaQOdNHuLvlfPVlsG69sL5g0DKhahfbpD560_275viiW9Jcnf9ER9u0ptiYw3d7ddcQfHVOEuyZZMu14tR3wnASU0bF46OpnDIQVRIAKPVleDyGAc0rni0_rT0c1ItZ39_GGSnxCdg8T-J-SEMe66IdNGCqhWZP3rjGYjoz-Heez6p0XWfLtG5PtH6HX5Z78xMpBeU146LlGKbmOT4DSpTiQ5wz9H4YimbcjDjvTfC4W81qvvAMPvM66ypBi89YsAxqkh-3-Q7V14xUxeKH-HA}'
+    }
+  }
+
+  useEffect(() => {
+    fetch('https://dah2vb2cprod.b2clogin.com/914d88b1-3523-4bf6-9be4-1b96b4f6f919/oauth2/v2.0/token?p=B2C_1A_signup_signin_common', post_request)
+      .then(response => {return response.json();})
+      .then(json => setData(json))
+      .catch(error => console.error(error))
+      .finally(() => setLoading(false));
+  }, []); 
