@@ -5,41 +5,80 @@ import { createStackNavigator } from '@react-navigation/stack';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Modal from 'react-native-modal';
 import { ShareableReactImage } from './instagram_shareable';
-import Clipboard from 'expo-clipboard';
-import Test from './test'
-import openMap from 'react-native-open-maps';
+import { login } from './loginPage'
+import { loadMap } from './loadMap'
 
-function login({ navigation }) {
-  const [name, onChangeName] = React.useState('');
-
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <TextInput
-        style={{height: 40,margin: 12, fontSize:30}}
-        onChangeText={onChangeName}
-        value={name}
-        placeholder="Enter Your Name!"
-        textAlign={'center'}
-      />
-      <TouchableOpacity style={{height:40, width:125, backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginBottom:10}} 
-        onPress={() => {
-          navigation.navigate(' ', {
-            name: name,
-          });
-        }}>
-        <Text style={{fontSize:24,}}>Enter</Text>
-      </TouchableOpacity>
-    </View>
-  );
+const jsonToFormData = (json) => {
+  const body = [];
+  // eslint-disable-next-line guard-for-in,no-restricted-syntax
+  for (const property in json) {
+    const encodedKey = encodeURIComponent(property);
+    const encodedValue = encodeURIComponent(json[property]);
+    body.push(`${encodedKey}=${encodedValue}`);
+  }
+  return body.join('&');
 }
+
+const styles = StyleSheet.create({
+  buttonContainer: {
+    margin: 10,
+    width:100,
+    height:'100%',
+  }, Logo: {
+    width: 367,
+    height: 367,
+    resizeMode:'contain',
+  }, mainPageButton: {
+    height:40, 
+    width:390, 
+    backgroundColor: "#d3d3d3",
+    alignItems:'center',
+    justifyContent:'center', 
+    borderRadius: 10, 
+    marginBottom:10
+  }, modalText: {
+    fontSize:20, 
+    textAlign:'center', 
+    margin:20
+  },centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  }, modalView: {
+    margin: 0,
+    height:600,
+    width:300,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 0,
+    alignItems: 'center',
+    shadowColor: 'grey',
+    shadowOffset: {width: 0,height: 2,},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  }, openButton: {
+    backgroundColor: '#2b6be4',
+    borderRadius: 20,
+    elevation: 2,
+    margin:10,
+  },textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }, modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+});
 
 function mainPage({route, navigation}) {
   const [isLoading, setLoading] = useState(true); 
   const [accessToken, setAccessToken] = useState('');
   const [authData, setAuthData] = useState({'access_token':''});
   const [locData, setLocData] = useState(null);
-  const [vehicleData, setVehicleData] = useState(
-  {
+  const [vehicleData, setVehicleData] = useState( {
     'vehicle':{
       'modelName':'', 
       'modelYear':'', 
@@ -48,7 +87,7 @@ function mainPage({route, navigation}) {
         'longitude':0
       },
       'vehicleDetails': {
-        "odometer":0
+        'odometer':0
       }
     }
   });
@@ -65,37 +104,8 @@ function mainPage({route, navigation}) {
     greetingMessage = 'Good Evening';
   }
 
-  const jsonToFormData = (json) => {
-    const body = [];
-    // eslint-disable-next-line guard-for-in,no-restricted-syntax
-    for (const property in json) {
-      const encodedKey = encodeURIComponent(property);
-      const encodedValue = encodeURIComponent(json[property]);
-      body.push(`${encodedKey}=${encodedValue}`);
-    }
-    return body.join('&');
-  }
-
-  const styles = StyleSheet.create({
-    test_content: {
-      padding: 20,
-      display: 'flex',
-      alignItems: 'center',
-      margin: 'auto',
-      color: 'grey'
-    }, buttonContainer: {
-      margin: 10,
-      width:100,
-      height:'100%',
-    }, Logo: {
-      width: 367,
-      height: 367,
-      resizeMode:'contain',
-    },
-  });
-
   let OAuth_uri = 'https://dah2vb2cprod.b2clogin.com/914d88b1-3523-4bf6-9be4-1b96b4f6f919/oauth2/v2.0/token?p=B2C_1A_signup_signin_common'
-
+  
   useEffect(() => {
     fetch(OAuth_uri, {
       method: 'POST',
@@ -129,7 +139,6 @@ function mainPage({route, navigation}) {
           'authorization':'Bearer '+ accessToken
         }
       }
-
       fetch(ford_api, get_request)
         .then(response => response.json())
         .then(json => setVehicleData(json))
@@ -139,52 +148,40 @@ function mainPage({route, navigation}) {
     }
   }, [accessToken])
 
-  const getLocation = () => {
-    let ford_api = 'https://api.mps.ford.com/api/fordconnect/vehicles/v1/8a7f9fa878849d8a0179579d2f26043a/location'
-    let get_request = {
-      method: 'GET',
-      headers: {
-        //'accept':'application/json',
-        //'Content-Type':'application/json',
-        'api-version':'2020-06-01',
-        'Application-Id':'afdc085b-377a-4351-b23e-5e1d35fb3700',
-        'authorization':'Bearer '+ accessToken
-      }
+  useEffect(() => {
+    if (vehicleData.vehicle.modelYear != '') {
+      setLoading(false)
     }
-    fetch(ford_api, get_request)
-      .then(response => response.json())
-      .then(json => setLocData(json))
-      .catch(error => console.error(error))
-      .finally(() => setLoading(false));
-  }
+  }, [vehicleData])
+
   return (
     <View>
-      <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
-      <Text style= {{fontWeight:"bold", fontSize:32, paddingTop: 25, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
-      <View alignItems="center" justifyContent="center">
-        <Image
-            style={styles.Logo}
-            source={require('./assets/ford_edge.png')}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={{height:40, width:390, backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginBottom:10}} onPress={getLocation}>
-            <Text style={{fontSize:24,}}>Diagnostics</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{height:40, width:390, backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginBottom:10}} onPress={() => {navigation.navigate('Vehicle Location', {latitude: vehicleData.vehicle.vehicleLocation.latitude, longitude:vehicleData.vehicle.vehicleLocation.longitude});}}>
-            <Text style={{fontSize:24,}}>Location</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{height:40, width:390, backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginBottom:10}} onPress={() => {navigation.navigate('Badges',{odometer:vehicleData.vehicle.vehicleDetails.odometer});}}>
-            <Text style={{fontSize:24,}}>My Car</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{height:40, width:390, backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginBottom:10}} onPress={getLocation}>
-            <Text style={{fontSize:24,}}>Vehicle Info</Text>
-        </TouchableOpacity>
-      </View>
+      {isLoading ? <Text style = {{textAlign: 'center'}}> Loading... </Text>:
       <View>
-          {isLoading ? <Text></Text>:<Text>{locData.status}</Text>}
-      </View>
-    </View> 
+        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
+        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
+        <View alignItems="center" justifyContent="center">
+          <Image
+              style={styles.Logo}
+              source={require('./assets/ford_edge.png')}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.mainPageButton} onPress={loadMap}>
+              <Text style={{fontSize:24,}}>Diagnostics</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.mainPageButton} onPress={() => {navigation.navigate('Vehicle Location', {latitude: vehicleData.vehicle.vehicleLocation.latitude, longitude:vehicleData.vehicle.vehicleLocation.longitude});}}>
+              <Text style={{fontSize:24,}}>Location</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.mainPageButton} onPress={() => {navigation.navigate('Badges',{odometer:vehicleData.vehicle.vehicleDetails.odometer});}}>
+              <Text style={{fontSize:24,}}>My Car</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.mainPageButton} onPress={loadMap}>
+              <Text style={{fontSize:24,}}>Vehicle Info</Text>
+          </TouchableOpacity>
+        </View>
+      </View>}
+    </View>
     ); 
 };
 
@@ -208,75 +205,23 @@ function loadBadges({route}) {
   if (odometer >= 1000) {
     var thousandMiles = true;
   }
-  const styles = StyleSheet.create({
-    centeredView: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 22,
-    },
-    modalView: {
-      margin: 0,
-      height:600,
-      width:300,
-      backgroundColor: 'white',
-      borderRadius: 20,
-      padding: 0,
-      alignItems: 'center',
-      shadowColor: 'grey',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    openButton: {
-      backgroundColor: '#2b6be4',
-      borderRadius: 20,
-      elevation: 2,
-      margin:10,
-    },
-    textStyle: {
-      color: 'white',
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
-    modalText: {
-      marginBottom: 15,
-      textAlign: 'center',
-    },
-  });
 
   return (
     <View>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modal100milesVisible}
-        onBackdropPress={() => setModal100milesVisible(false)}
-        justifyContent= 'center'
-        alignItems='center'>
+      <Modal animationType="fade" transparent={true} visible={modal100milesVisible} 
+        onBackdropPress={() => setModal100milesVisible(false)} justifyContent= 'center' alignItems='center'>
         <View style={styles.modalView}>
-          <Image
-            style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
+          <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst100</Text>
         </View>
       </Modal>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modal500milesVisible}
-        onBackdropPress={() => setModal500milesVisible(false)}
-        justifyContent= 'center'
-        alignItems='center'>
+      <Modal animationType="fade" transparent={true} visible={modal100milesVisible} 
+        onBackdropPress={() => setModal500milesVisible(false)} justifyContent= 'center' alignItems='center'>
         <View style={styles.modalView}>
-          <Image
-            style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
+          <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
@@ -287,9 +232,7 @@ function loadBadges({route}) {
           <ShareableReactImage />
         </View>
       </Modal>
-      <ScrollView
-        snapToInterval={100} //your element width
-        snapToAlignment={"center"}>
+      <ScrollView snapToInterval={100} snapToAlignment={"center"}>
           {hundredMiles ? 
       <TouchableOpacity
         style={styles.openButton}
@@ -352,52 +295,6 @@ function loadBadges({route}) {
   );
 }
 
-
-function locOnMap({route}) {
-  const {latitude, longitude} = route.params;
-  var lat = parseFloat(latitude);
-  var long = parseFloat(longitude);
-  const styles = StyleSheet.create({
-    mapcontainer: {
-          height: 400,
-          width: 400,
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-    },
-    map: {
-          ...StyleSheet.absoluteFillObject,
-    },
-  })
-  return (
-    <View>
-    <View>
-      <View style={styles.mapcontainer}>
-        <MapView
-            provider={PROVIDER_GOOGLE}
-            style={styles.map}
-            initialRegion={{
-              latitude: lat,
-              longitude: long,
-              latitudeDelta: 0.015,
-              longitudeDelta: 0.0121,
-            }}
-            showUserLocation={false} >
-            <Marker coordinate={{
-              latitude: lat,
-              longitude: long,
-            }}  />
-        </MapView>
-      </View>
-    </View>
-    <View >
-      <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "google", navigate_mode: "navigate", query: "Ford Rotunda Center"})} title="Get Directions">
-        <Text>Get Directions</Text>
-      </TouchableOpacity>
-    </View>
-    </View>
-  );
-}
-
 const Stack = createStackNavigator();
 
 function App() {
@@ -406,7 +303,7 @@ function App() {
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={login} />
         <Stack.Screen name=" " component={mainPage} />
-        <Stack.Screen name="Vehicle Location" component={locOnMap} />
+        <Stack.Screen name="Vehicle Location" component={loadMap} />
         <Stack.Screen name="Badges" component={loadBadges} />
       </Stack.Navigator>
     </NavigationContainer>
