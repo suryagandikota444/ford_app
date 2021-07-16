@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Modal from 'react-native-modal';
+import { ShareableReactImage } from './instagram_shareable';
 
 function login({ navigation }) {
   const [name, onChangeName] = React.useState('');
@@ -270,6 +271,7 @@ function loadBadges({route}) {
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst500</Text>
+          <ShareableReactImage />
         </View>
       </Modal>
       <ScrollView
