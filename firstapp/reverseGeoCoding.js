@@ -4,9 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 
-export const reverseGeoCoding = (latitude, longitude) => {
+function reverseGeoCoding(latitude, longitude) {
     const [addressInfo, setAddressInfo] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     
     const api_key = 'AIzaSyAu03IOh03m668y7TKFnS4aazx1e8S7sB0';
 
@@ -19,7 +19,7 @@ export const reverseGeoCoding = (latitude, longitude) => {
         .catch(error => console.error(error))
         .finally(setLoading(false))
     }, []);
-    
+
     if (!loading) {
         return (addressInfo);
     }

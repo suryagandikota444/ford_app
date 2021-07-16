@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, Text, View, ScrollView, StyleSheet, Button, Image, TouchableOpacity, TextInput, ImageBackground, TouchableHighlight} from 'react-native';
+import Clipboard from '@react-native-community/clipboard';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
@@ -7,7 +8,7 @@ import Modal from 'react-native-modal';
 import { ShareableReactImage } from './instagram_shareable';
 import { login } from './loginPage'
 import { loadMap } from './loadMap'
-import { reverseGeoCoding } from './reverseGeoCoding';
+//import { reverseGeoCoding } from './reverseGeoCoding';
 import AppLoading from 'expo-app-loading';
 import {
   useFonts, 
@@ -16,7 +17,6 @@ import {
 
 const jsonToFormData = (json) => {
   const body = [];
-  // eslint-disable-next-line guard-for-in,no-restricted-syntax
   for (const property in json) {
     const encodedKey = encodeURIComponent(property);
     const encodedValue = encodeURIComponent(json[property]);
@@ -84,10 +84,11 @@ function mainPage({route, navigation}) {
   let [fontsLoaded] = useFonts({
     Inter_900Black,
   })
+  
   const [isLoading, setLoading] = useState(true); 
   const [accessToken, setAccessToken] = useState('');
   const [authData, setAuthData] = useState({'access_token':''});
-  const [locData, setLocData] = useState(null);
+  const [addressInfo, setAddressInfo] = useState({'results':[{'formatted_address':'','address_components':['','','',{'long_name':0},'',{'long_name':0}]}]});
   const [vehicleData, setVehicleData] = useState( {
     'vehicle':{
       'modelName':'', 
@@ -98,10 +99,16 @@ function mainPage({route, navigation}) {
       },
       'vehicleDetails': {
         'odometer':0
+      },
+      'vehicleStatus': {
+        'ignitionStatus': {
+          'value':''
+        }
       }
     }
   });
-  //console.log(reverseGeoCoding(42.300227,-83.205268))//(vehicleData.vehicle.vehicleLocation.latitude, vehicleData.vehicle.vehicleLocation.longitude))
+
+  //console.log(addressInfo.results[0].formatted_address);//(vehicleData.vehicle.vehicleLocation.latitude, vehicleData.vehicle.vehicleLocation.longitude))
   const {name} = route.params;
 
   var today = new Date();
@@ -112,6 +119,12 @@ function mainPage({route, navigation}) {
     greetingMessage = 'Good Afternoon';
   } else if ((today.getHours() >= 17) && (today.getHours() <= 24)){
     greetingMessage = 'Good Evening';
+  }
+  var ignition = false;
+  if (vehicleData.vehicle.vehicleStatus.ignitionStatus.value === "On") {
+    ignition = true;
+  } else {
+    ignition = false;
   }
 
   let OAuth_uri = 'https://dah2vb2cprod.b2clogin.com/914d88b1-3523-4bf6-9be4-1b96b4f6f919/oauth2/v2.0/token?p=B2C_1A_signup_signin_common'
@@ -157,8 +170,16 @@ function mainPage({route, navigation}) {
   }, [accessToken])
 
   useEffect(() => {
-    if (vehicleData.vehicle.modelYear != '' ) {
-      setLoading(false)
+    if (vehicleData.vehicle.modelYear != '' ) {      
+      const api_key = 'AIzaSyAu03IOh03m668y7TKFnS4aazx1e8S7sB0';
+
+      const gmaps_uri = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+vehicleData.vehicle.vehicleLocation.latitude+','+vehicleData.vehicle.vehicleLocation.longitude+'&key='+api_key;
+
+      fetch(gmaps_uri)
+          .then(response => response.json())
+          .then(json => setAddressInfo(json))
+          .catch(error => console.error(error))
+          .finally(() => setLoading(false))
     }
   }, [vehicleData])
 
@@ -166,26 +187,41 @@ function mainPage({route, navigation}) {
     <View>
       {isLoading ? <Text style = {{textAlign: 'center'}}> Loading... </Text>:
       <View>
-        <Text style= {{fontWeight:"bold", fontSize:25, fontFamily: 'Inter_900Black', paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
-        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
+        <Text style= {{fontWeight:"bold", fontSize:25, fontFamily: 'Inter_900Black', paddingTop: 10, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
+        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 10, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
         <View alignItems="center" justifyContent="center">
           <Image
-              style={styles.Logo}
+              style={{...styles.Logo}}
               source={require('./assets/ford_edge.png')}
           />
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.mainPageButton} onPress={loadMap}>
-              <Text style={{fontSize:24,}}>Diagnostics</Text>
+        <View>
+          <Text style={{fontSize:25, textAlign:'center', paddingBottom:20}}>
+            Distance to empty: <Text style={{fontWeight:'bold'}}>{vehicleData.vehicle.vehicleDetails.fuelLevel.distanceToEmpty}</Text> miles
+          </Text>
+        </View>
+        <View style={{ flexDirection:"row", alignItems:'center', justifyContent:'center'}}>
+          <TouchableOpacity style={{...styles.mainPageButton, width:'45%', marginRight:20}}>
+              <Text style={{fontSize:20,}}>Tire Pressure: {vehicleData.vehicle.vehicleStatus.tirePressureWarning ? <Text style={{fontSize:20,fontWeight:'bold',color:'red'}}>Check</Text>:<Text style={{fontSize:20,fontWeight:'bold',color:'green'}}>OK</Text>}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.mainPageButton} onPress={() => {navigation.navigate('Vehicle Location', {latitude: vehicleData.vehicle.vehicleLocation.latitude, longitude:vehicleData.vehicle.vehicleLocation.longitude});}}>
+          <TouchableOpacity style={{...styles.mainPageButton, width:'45%'}}>
+              <Text style={{fontSize:20,}}>ODO: <Text style={{fontWeight:'bold'}}>{vehicleData.vehicle.vehicleDetails.odometer}</Text> miles</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flexDirection:"row", alignItems:'center', justifyContent:'center'}}>
+          <TouchableOpacity style={{...styles.mainPageButton, width:'45%', marginRight:20}}>
+              <Text style={{fontSize:20,}}>Engine: {ignition ? <Text style={{fontSize:20,fontWeight:'bold',color:'red'}}>OFF</Text>:<Text style={{fontSize:20,fontWeight:'bold',color:'green'}}>ON</Text>}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={{...styles.mainPageButton, width:'45%'}}>
+          <Text style={{fontSize:20,}}>Trip: <Text style={{fontWeight:'bold'}}>{vehicleData.vehicle.vehicleDetails.mileage}</Text> miles</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{...styles.buttonContainer, paddingTop:20}}>
+          <TouchableOpacity style={{...styles.mainPageButton}} onPress={() => {navigation.navigate('Vehicle Location', {latitude: vehicleData.vehicle.vehicleLocation.latitude, longitude:vehicleData.vehicle.vehicleLocation.longitude, addressInfo:addressInfo.results[0].formatted_address});}}>
               <Text style={{fontSize:24,}}>Location</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.mainPageButton} onPress={() => {navigation.navigate('Badges',{odometer:vehicleData.vehicle.vehicleDetails.odometer});}}>
+          <TouchableOpacity style={styles.mainPageButton} onPress={() => {navigation.navigate('Badges',{odometer:vehicleData.vehicle.vehicleDetails.odometer, addressInfo:addressInfo.results[0].formatted_address, addressInfo:addressInfo.results[0].address_components[5].long_name, addressInfo:addressInfo.results[0].address_components[3].long_name});}}>
               <Text style={{fontSize:24,}}>My Car</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.mainPageButton} onPress={loadMap}>
-              <Text style={{fontSize:24,}}>Vehicle Info</Text>
           </TouchableOpacity>
         </View>
       </View>}
@@ -196,12 +232,9 @@ function mainPage({route, navigation}) {
 function loadBadges({route}) {
   const [modal100milesVisible, setModal100milesVisible] = useState(false);
   const [modal500milesVisible, setModal500milesVisible] = useState(false);
-  const {odometer} = route.params;
+  const [modalHomeTownVisible, setModalHomeTownVisible] = useState(false);
+  const {odometer, addressInfo, state, city} = route.params;
   const [copiedText, setCopiedText] = useState('')
-
-  const copyToClipboard = () => {
-      Clipboard.setString("#fordfirst500");
-  }
 
 
   if (odometer >= 100) {
@@ -214,6 +247,10 @@ function loadBadges({route}) {
     var thousandMiles = true;
   }
 
+  if ((state == 'Michigan') && (city=='Dearborn')) {
+    var visitedHomeCity = true;
+  }
+
   return (
     <View>
       <Modal animationType="fade" transparent={true} visible={modal100milesVisible} 
@@ -222,13 +259,12 @@ function loadBadges({route}) {
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
-
-          <Text style={styles.modalText}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
-          <Text style={styles.modalText}>#fordfirst100</Text>
-          <TouchableOpacity onPress={copyToClipboard}>
+          <Text style={{...styles.modalText, fontSize:20}}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
+          <Text style={{...styles.modalText, fontSize:20}}>#fordfirst100</Text>
+          <TouchableOpacity>
             <Text>Click here to copy to Clipboard</Text>
           </TouchableOpacity>
-          <ShareableReactImage />
+          <ShareableReactImage message='#fordfirst100'/>
         </View>
       </Modal>
       <Modal animationType="fade" transparent={true} visible={modal500milesVisible} 
@@ -237,13 +273,26 @@ function loadBadges({route}) {
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
-
-          <Text style={styles.modalText}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
-          <Text style={styles.modalText}>#fordfirst500</Text>
-          <TouchableOpacity onPress={copyToClipboard}>
+          <Text style={{...styles.modalText, fontSize:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
+          <Text style={{...styles.modalText, fontSize:20}}>#fordfirst500</Text>
+          <TouchableOpacity >
             <Text>Click here to copy to Clipboard</Text>
           </TouchableOpacity>
-          <ShareableReactImage />
+          <ShareableReactImage message='#fordfirst500'/>
+        </View>
+      </Modal>
+      <Modal animationType="fade" transparent={true} visible={modalHomeTownVisible} 
+        onBackdropPress={() => setModalHomeTownVisible(false)} justifyContent= 'center' alignItems='center'>
+        <View style={styles.modalView}>
+          <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
+            source={require('./assets/medal.png')}
+          />
+          <Text style={{...styles.modalText, fontSize:20}}>Congratulations on visiting the birth town of Ford! Be sure to check out our headquarters or the Henry Ford Museum and tag us at @ford on Twitter, Instagram, or Facebook to share your experience!</Text>
+          <Text style={{...styles.modalText, fontSize:20}}>#fordroots</Text>
+          <TouchableOpacity >
+            <Text>Click here to copy to Clipboard</Text>
+          </TouchableOpacity>
+          <ShareableReactImage message='#fordroots'/>
         </View>
       </Modal>
       <ScrollView snapToInterval={100} snapToAlignment={"center"}>
@@ -275,33 +324,12 @@ function loadBadges({route}) {
       <TouchableOpacity
         style={styles.openButton}
         onPress={() => {
-          setModal500milesVisible(true);
+          setModalHomeTownVisible(true);
         }}>
+        <Text style={{textAlign:'center', fontSize:20, color:'white'}} >Visited our Hometown!</Text>
         <Image
-          style = {styles.medalImage}
-          source={require('./assets/medal.png')}
-        />
-      </TouchableOpacity>:<Text></Text>}
-      {fiveHundredMiles ? 
-      <TouchableOpacity
-        style={styles.openButton}
-        onPress={() => {
-          setModal500milesVisible(true);
-        }}>
-        <Image
-          style = {styles.medalImage}
-          source={require('./assets/medal.png')}
-        />
-      </TouchableOpacity>:<Text></Text>}
-      {fiveHundredMiles ? 
-      <TouchableOpacity
-        style={styles.openButton}
-        onPress={() => {
-          setModal500milesVisible(true);
-        }}>
-        <Image
-          style = {styles.medalImage}
-          source={require('./assets/medal.png')}
+          style = {{height:200,width:'100%', borderRadius:20,}}
+          source={require('./assets/henry_ford_museum.jpg')}
         />
       </TouchableOpacity>:<Text></Text>}
       </ScrollView>

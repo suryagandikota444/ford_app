@@ -4,12 +4,12 @@ import { FlatList, Text, View, ScrollView, StyleSheet, Button, Image, TouchableO
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 
 export const loadMap = ({route}) => {
-    const {latitude, longitude} = route.params;
+    const {latitude, longitude, addressInfo} = route.params;
     var lat = parseFloat(latitude);
     var long = parseFloat(longitude);
     const styles = StyleSheet.create({
       mapcontainer: {
-            height: 600,
+            height: 500,
             width: 400,
             justifyContent: 'flex-end',
             alignItems: 'center',
@@ -38,7 +38,8 @@ export const loadMap = ({route}) => {
         </MapView>
       </View>
       <View >
-        <Text>Your car is currently located in: Dearborn, MI</Text>
+        <Text style={{fontSize:20, paddingTop:40, textAlign:'center'}}>Your car is currently located at: </Text>
+        <Text style={{fontSize:20, fontWeight:'bold',paddingBottom:40, textAlign:'center'}}>{addressInfo}</Text> 
       <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "apple", query: "Ford Rotunda Center"})} title="Get Directions">
         <Text>Get Directions</Text>
       </TouchableOpacity>
