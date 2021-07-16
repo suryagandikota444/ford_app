@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet,} from 'react-native';
+import openMap from 'react-native-open-maps';
+import { FlatList, Text, View, ScrollView, StyleSheet, Button, Image, TouchableOpacity, TextInput, ImageBackground, TouchableHighlight} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 
 export const loadMap = ({route}) => {
@@ -8,7 +9,7 @@ export const loadMap = ({route}) => {
     var long = parseFloat(longitude);
     const styles = StyleSheet.create({
       mapcontainer: {
-            height: 400,
+            height: 600,
             width: 400,
             justifyContent: 'flex-end',
             alignItems: 'center',
@@ -18,6 +19,7 @@ export const loadMap = ({route}) => {
       },
     })
     return (
+      <View>
       <View style={styles.mapcontainer}>
         <MapView
             provider={PROVIDER_GOOGLE}
@@ -35,5 +37,12 @@ export const loadMap = ({route}) => {
             }}  />
         </MapView>
       </View>
+      <View >
+        <Text>Your car is currently located in: Dearborn, MI</Text>
+      <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "apple", query: "Ford Rotunda Center"})} title="Get Directions">
+        <Text>Get Directions</Text>
+      </TouchableOpacity>
+    </View>
+    </View>
     );
   }
