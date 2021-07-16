@@ -4,6 +4,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Modal from 'react-native-modal';
+import { ShareableReactImage } from './instagram_shareable';
+import Clipboard from 'expo-clipboard';
+import Test from './test'
+import openMap from 'react-native-open-maps';
 
 function login({ navigation }) {
   const [name, onChangeName] = React.useState('');
@@ -188,6 +192,13 @@ function loadBadges({route}) {
   const [modal100milesVisible, setModal100milesVisible] = useState(false);
   const [modal500milesVisible, setModal500milesVisible] = useState(false);
   const {odometer} = route.params;
+  const [copiedText, setCopiedText] = useState('')
+
+  const copyToClipboard = () => {
+      Clipboard.setString("#fordfirst500");
+  }
+
+
   if (odometer >= 100) {
     var hundredMiles = true;
   }
@@ -270,6 +281,10 @@ function loadBadges({route}) {
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst500</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text>Click here to copy to Clipboard</Text>
+          </TouchableOpacity>
+          <ShareableReactImage />
         </View>
       </Modal>
       <ScrollView
@@ -337,6 +352,7 @@ function loadBadges({route}) {
   );
 }
 
+
 function locOnMap({route}) {
   const {latitude, longitude} = route.params;
   var lat = parseFloat(latitude);
@@ -353,22 +369,31 @@ function locOnMap({route}) {
     },
   })
   return (
-    <View style={styles.mapcontainer}>
-      <MapView
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          initialRegion={{
-            latitude: lat,
-            longitude: long,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
-          showUserLocation={false} >
-          <Marker coordinate={{
-            latitude: lat,
-            longitude: long,
-          }}  />
-      </MapView>
+    <View>
+    <View>
+      <View style={styles.mapcontainer}>
+        <MapView
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            initialRegion={{
+              latitude: lat,
+              longitude: long,
+              latitudeDelta: 0.015,
+              longitudeDelta: 0.0121,
+            }}
+            showUserLocation={false} >
+            <Marker coordinate={{
+              latitude: lat,
+              longitude: long,
+            }}  />
+        </MapView>
+      </View>
+    </View>
+    <View >
+      <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "google", navigate_mode: "navigate", query: "Ford Rotunda Center"})} title="Get Directions">
+        <Text>Get Directions</Text>
+      </TouchableOpacity>
+    </View>
     </View>
   );
 }
