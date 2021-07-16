@@ -7,6 +7,12 @@ import Modal from 'react-native-modal';
 import { ShareableReactImage } from './instagram_shareable';
 import { login } from './loginPage'
 import { loadMap } from './loadMap'
+import AppLoading from 'expo-app-loading';
+import {
+  useFonts, 
+  Inter_900Black,
+}from '@expo-google-fonts/inter';
+
 
 const jsonToFormData = (json) => {
   const body = [];
@@ -37,6 +43,7 @@ const styles = StyleSheet.create({
     borderRadius: 10, 
     marginBottom:10
   }, modalText: {
+    //fontFamily:'RubikSans_400Regular',
     fontSize:20, 
     textAlign:'center', 
     margin:20
@@ -64,7 +71,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     margin:10,
   },textStyle: {
-    color: 'white',
+   
     fontWeight: 'bold',
     textAlign: 'center',
   }, modalText: {
@@ -74,6 +81,9 @@ const styles = StyleSheet.create({
 });
 
 function mainPage({route, navigation}) {
+  let [fontsLoaded] = useFonts({
+    Inter_900Black,
+  })
   const [isLoading, setLoading] = useState(true); 
   const [accessToken, setAccessToken] = useState('');
   const [authData, setAuthData] = useState({'access_token':''});
@@ -149,7 +159,7 @@ function mainPage({route, navigation}) {
   }, [accessToken])
 
   useEffect(() => {
-    if (vehicleData.vehicle.modelYear != '') {
+    if (vehicleData.vehicle.modelYear != '' ) {
       setLoading(false)
     }
   }, [vehicleData])
@@ -158,7 +168,7 @@ function mainPage({route, navigation}) {
     <View>
       {isLoading ? <Text style = {{textAlign: 'center'}}> Loading... </Text>:
       <View>
-        <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
+        <Text style= {{fontWeight:"bold", fontSize:25, fontFamily: 'Inter_900Black', paddingTop: 25, textAlign: 'center'}}> {greetingMessage}, {name}!</Text>
         <Text style= {{fontWeight:"bold", fontSize:25, paddingTop: 25, textAlign: 'center'}}>{vehicleData.vehicle.modelYear} Ford {vehicleData.vehicle.modelName}</Text>
         <View alignItems="center" justifyContent="center">
           <Image
