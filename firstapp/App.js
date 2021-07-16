@@ -7,6 +7,7 @@ import Modal from 'react-native-modal';
 import { ShareableReactImage } from './instagram_shareable';
 import { login } from './loginPage'
 import { loadMap } from './loadMap'
+import { reverseGeoCoding } from './reverseGeoCoding';
 
 const jsonToFormData = (json) => {
   const body = [];
@@ -91,7 +92,7 @@ function mainPage({route, navigation}) {
       }
     }
   });
-  
+  //console.log(reverseGeoCoding(42.300227,-83.205268))//(vehicleData.vehicle.vehicleLocation.latitude, vehicleData.vehicle.vehicleLocation.longitude))
   const {name} = route.params;
 
   var today = new Date();
@@ -143,8 +144,6 @@ function mainPage({route, navigation}) {
         .then(response => response.json())
         .then(json => setVehicleData(json))
         .catch(error => console.error(error))
-    } else {
-      console.log('accessToken not granted yet!')
     }
   }, [accessToken])
 
@@ -207,17 +206,17 @@ function loadBadges({route}) {
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
-          <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
-          <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst100</Text>
+          <Text style={styles.modalText}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
+          <Text style={styles.modalText}>#fordfirst100</Text>
         </View>
       </Modal>
-      <Modal animationType="fade" transparent={true} visible={modal100milesVisible} 
+      <Modal animationType="fade" transparent={true} visible={modal500milesVisible} 
         onBackdropPress={() => setModal500milesVisible(false)} justifyContent= 'center' alignItems='center'>
         <View style={styles.modalView}>
           <Image style = {{height:300, width:300, resizeMode:'contain', paddingTop:0}}
             source={require('./assets/medal.png')}
           />
-          <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
+          <Text style={styles.modalText}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
           <Text style={styles.modalText}>#fordfirst500</Text>
           <ShareableReactImage />
         </View>
