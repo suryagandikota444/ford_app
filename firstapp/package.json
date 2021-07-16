@@ -8,10 +8,15 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@react-native-community/clipboard": "^1.5.1",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
     "expo": "~42.0.1",
+    "expo-clipboard": "~1.1.0",
+    "expo-file-system": "~11.1.3",
+    "expo-image-manipulator": "~9.2.2",
+    "expo-sharing": "~9.2.1",
     "expo-status-bar": "~1.0.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -19,16 +24,14 @@
     "react-native-gesture-handler": "^1.10.3",
     "react-native-maps": "^0.28.0",
     "react-native-modal": "^12.0.2",
+    "react-native-open-maps": "^0.3.6",
     "react-native-reanimated": "^2.2.0",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.4.0",
     "react-native-share": "^6.3.0",
     "react-native-view-shot": "^3.1.2",
     "react-native-web": "^0.17.1",
-    "react-router-dom": "^5.2.0",
-    "expo-sharing": "~9.2.1",
-    "expo-file-system": "~11.1.3",
-    "expo-image-manipulator": "~9.2.2"
+    "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
