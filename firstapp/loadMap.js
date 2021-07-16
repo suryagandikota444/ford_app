@@ -9,7 +9,7 @@ export const loadMap = ({route}) => {
     var long = parseFloat(longitude);
     const styles = StyleSheet.create({
       mapcontainer: {
-            height: 400,
+            height: 600,
             width: 400,
             justifyContent: 'flex-end',
             alignItems: 'center',
@@ -38,7 +38,8 @@ export const loadMap = ({route}) => {
         </MapView>
       </View>
       <View >
-      <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "google", navigate_mode: "navigate", query: "Ford Rotunda Center"})} title="Get Directions">
+        <Text>Your car is currently located in: Dearborn, MI</Text>
+      <TouchableOpacity style={{height:40,  backgroundColor: "#d3d3d3",alignItems:'center',justifyContent:'center', borderRadius: 10, marginTop:10}} onPress={() => openMap({latitude: lat, longitude: long, provider: "apple", query: "Ford Rotunda Center"})} title="Get Directions">
         <Text>Get Directions</Text>
       </TouchableOpacity>
     </View>

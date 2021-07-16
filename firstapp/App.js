@@ -216,6 +216,10 @@ function loadBadges({route}) {
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 100 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 100 miles!</Text>
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst100</Text>
+          <TouchableOpacity onPress={copyToClipboard}>
+            <Text>Click here to copy to Clipboard</Text>
+          </TouchableOpacity>
+          <ShareableReactImage />
         </View>
       </Modal>
       <Modal animationType="fade" transparent={true} visible={modal100milesVisible} 
