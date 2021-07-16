@@ -218,7 +218,7 @@ function loadBadges({route}) {
             source={require('./assets/medal.png')}
           />
           <Text style={{fontSize:20, textAlign:'center', margin:20}}>Congratulations on your first 500 miles! Tag us at @ford on Twitter, Instagram, or Facebook to tell us what you did with your vehicle in your first 500 miles!</Text>
-          <Text style={styles.modalText}>#fordfirst500</Text>
+          <Text style={{fontSize:20, textAlign:'center', margin:20}}>#fordfirst500</Text>
           <ShareableReactImage />
         </View>
       </Modal>
