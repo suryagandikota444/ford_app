@@ -23,6 +23,8 @@
     },
     "web": {
       "favicon": "./assets/icon.png"
-    }
+    },
+    "description": "",
+    "githubUrl": "https://github.com/suryagandikota444/ford_app.git"
   }
 }
